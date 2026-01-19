@@ -34,9 +34,11 @@ export const FormField = ({
         placeholder={placeholder}
         required={required}
         className={error ? 'border-destructive' : ''}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${name}-error` : undefined}
       />
       {error && (
-        <p className="text-sm text-destructive mt-1">{error}</p>
+        <p id={`${name}-error`} className="text-sm text-destructive mt-1">{error}</p>
       )}
     </div>
   )

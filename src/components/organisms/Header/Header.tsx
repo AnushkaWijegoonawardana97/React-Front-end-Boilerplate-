@@ -21,6 +21,7 @@ export const Header = ({
             size="icon"
             onClick={onMenuClick}
             className="mr-2"
+            aria-label="Toggle menu"
           >
             <Menu className="h-5 w-5" />
           </Button>

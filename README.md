@@ -93,8 +93,8 @@ Basic building blocks that cannot be broken down further. Examples:
 ### Molecules
 Simple combinations of atoms that form simple UI patterns. Examples:
 - `FormField` - Input with label and error handling
-- `Card` - Container with header, content, and footer
-- `Alert` - Notification component
+- `Card` - Composed card with header, content, and footer (uses atom Card)
+- `Alert` - Composed alert with icon and structured content (uses atom Alert)
 
 **Location**: `src/components/molecules/`
 

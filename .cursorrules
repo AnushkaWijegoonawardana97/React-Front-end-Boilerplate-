@@ -152,7 +152,11 @@ fix(api): resolve CORS error in production
 
 feat(components): add new DataTable component
 
-BREAKING CHANGE: API endpoint structure changed
+feat(api)!: change endpoint structure for v2
+
+Migrate all endpoints from /api/v1/* to /api/v2/*
+
+BREAKING CHANGE: API endpoint paths changed from /api/v1/* to /api/v2/*
 ```
 
 ## Pull Request Guidelines

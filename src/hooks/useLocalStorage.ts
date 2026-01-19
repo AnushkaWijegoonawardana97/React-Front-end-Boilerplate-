@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export function useLocalStorage<T>(
   key: string,
@@ -19,12 +19,13 @@ export function useLocalStorage<T>(
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value
-      setStoredValue(valueToStore)
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore))
-      }
+      setStoredValue((prev) => {
+        const newValue = typeof value === 'function' ? value(prev) : value
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, JSON.stringify(newValue))
+        }
+        return newValue
+      })
     } catch (error) {
       console.error(error)
     }

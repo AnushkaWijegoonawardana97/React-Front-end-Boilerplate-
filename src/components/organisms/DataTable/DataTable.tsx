@@ -37,7 +37,7 @@ export function DataTable<T extends Record<string, unknown>>({
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
+              <TableCell colSpan={Math.max(1, columns.length)} className="text-center">
                 No data available
               </TableCell>
             </TableRow>

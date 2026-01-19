@@ -14,6 +14,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onOpenChange,
 }) => {
   const [isOpen, setIsOpen] = React.useState(open ?? false)
+  const menuRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     if (open !== undefined) {
@@ -26,17 +27,50 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     onOpenChange?.(newOpen)
   }
 
+  React.useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        handleOpenChange(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleOpenChange(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen])
+
   return (
-    <div className="relative inline-block text-left">
+    <div ref={menuRef} className="relative inline-block text-left">
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           if (child.type === DropdownMenuTrigger) {
+            const existingOnClick = (child.props as React.ButtonHTMLAttributes<HTMLButtonElement>).onClick
             return React.cloneElement(child as React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>, {
-              onClick: () => handleOpenChange(!isOpen),
+              onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+                existingOnClick?.(e)
+                handleOpenChange(!isOpen)
+              },
+              'aria-expanded': isOpen,
+              'aria-haspopup': 'menu',
             } as React.ButtonHTMLAttributes<HTMLButtonElement>)
           }
           if (child.type === DropdownMenuContent && isOpen) {
-            return React.cloneElement(child as React.ReactElement<React.HTMLAttributes<HTMLDivElement>>)
+            return React.cloneElement(child as React.ReactElement<React.HTMLAttributes<HTMLDivElement>>, {
+              role: 'menu',
+              'aria-hidden': !isOpen,
+            } as React.HTMLAttributes<HTMLDivElement>)
           }
         }
         return child

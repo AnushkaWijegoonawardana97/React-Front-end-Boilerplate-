@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -18,6 +19,7 @@ export interface FormFieldConfig {
   type?: string
   placeholder?: string
   validation?: z.ZodTypeAny
+  defaultValue?: unknown
 }
 
 export interface FormProps {
@@ -33,23 +35,48 @@ export const Form = ({
   submitLabel = 'Submit',
   className,
 }: FormProps) => {
-  const schema = z.object(
-    fields.reduce((acc, field) => {
-      if (field.validation) {
-        acc[field.name] = field.validation
-      } else {
-        acc[field.name] = z.string().min(1, `${field.label} is required`)
-      }
-      return acc
-    }, {} as Record<string, z.ZodTypeAny>)
+  const schema = React.useMemo(
+    () =>
+      z.object(
+        fields.reduce((acc, field) => {
+          if (field.validation) {
+            acc[field.name] = field.validation
+          } else {
+            acc[field.name] = z.string().min(1, `${field.label} is required`)
+          }
+          return acc
+        }, {} as Record<string, z.ZodTypeAny>)
+      ),
+    [fields]
+  )
+
+  const defaultValues = React.useMemo(
+    () =>
+      fields.reduce((acc, field) => {
+        if (field.defaultValue !== undefined) {
+          acc[field.name] = field.defaultValue
+        } else {
+          const fieldType = field.validation?._def?.typeName
+          if (fieldType === 'ZodNumber') {
+            acc[field.name] = 0
+          } else if (fieldType === 'ZodBoolean') {
+            acc[field.name] = false
+          } else if (fieldType === 'ZodArray') {
+            acc[field.name] = []
+          } else if (fieldType === 'ZodObject') {
+            acc[field.name] = {}
+          } else {
+            acc[field.name] = ''
+          }
+        }
+        return acc
+      }, {} as Record<string, unknown>),
+    [fields]
   )
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: fields.reduce((acc, field) => {
-      acc[field.name] = ''
-      return acc
-    }, {} as Record<string, string>),
+    defaultValues,
   })
 
   const handleSubmit = async (data: z.infer<typeof schema>) => {

@@ -38,22 +38,24 @@ const FormField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
-        render={({ field, fieldState, formState }) => (
-          <FormItem>
-            {props.render ? (
-              props.render({ field, fieldState, formState })
-            ) : (
-              <>
-                <FormLabel />
-                <FormControl>
-                  <input {...field} />
-                </FormControl>
-                <FormDescription />
-                <FormMessage />
-              </>
-            )}
-          </FormItem>
-        )}
+        render={({ field, fieldState, formState }) => {
+          const inputId = props.id ?? field.name ?? `field-${field.name}`
+          
+          if (props.render) {
+            return props.render({ field, fieldState, formState })
+          }
+
+          return (
+            <FormItem>
+              <FormLabel />
+              <FormControl>
+                <input {...field} id={inputId} />
+              </FormControl>
+              <FormDescription />
+              <FormMessage />
+            </FormItem>
+          )
+        }}
       />
     </FormFieldContext.Provider>
   )
@@ -124,21 +126,21 @@ FormLabel.displayName = 'FormLabel'
 const FormControl = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ ...props }, ref) => {
+>(({ children, ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
+  const child = React.Children.only(children) as React.ReactElement
+
   return (
-    <div
-      ref={ref}
-      id={formItemId}
-      aria-describedby={
-        !error
+    <div ref={ref} {...props}>
+      {React.cloneElement(child, {
+        id: formItemId,
+        'aria-describedby': !error
           ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
-      aria-invalid={!!error}
-      {...props}
-    />
+          : `${formDescriptionId} ${formMessageId}`,
+        'aria-invalid': !!error,
+      })}
+    </div>
   )
 })
 FormControl.displayName = 'FormControl'
@@ -165,7 +167,7 @@ const FormMessage = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message) : children
+  const body = error?.message != null ? String(error.message) : children
 
   if (!body) {
     return null
