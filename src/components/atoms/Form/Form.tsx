@@ -32,14 +32,15 @@ const FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >({
+  id,
   ...props
-}: ControllerProps<TFieldValues, TName>) => {
+}: ControllerProps<TFieldValues, TName> & { id?: string }) => {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller
         {...props}
         render={({ field, fieldState, formState }) => {
-          const inputId = props.id ?? field.name ?? `field-${field.name}`
+          const inputId = id ?? field.name ?? `field-${field.name}`
           
           if (props.render) {
             return props.render({ field, fieldState, formState })
@@ -147,7 +148,7 @@ const FormControl = React.forwardRef<
           ? `${formDescriptionId}`
           : `${formDescriptionId} ${formMessageId}`,
         'aria-invalid': !!error,
-      })}
+      } as React.HTMLAttributes<HTMLElement>)}
     </div>
   )
 })

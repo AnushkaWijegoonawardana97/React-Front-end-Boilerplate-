@@ -20,7 +20,7 @@ export interface DataTableProps<T> {
   className?: string
 }
 
-export function DataTable<T extends Record<string, unknown>>({
+export function DataTable<T = Record<string, unknown>>({
   columns,
   data,
   className,

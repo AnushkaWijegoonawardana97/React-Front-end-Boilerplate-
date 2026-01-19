@@ -55,19 +55,20 @@ export const Form = ({
       fields.reduce((acc, field) => {
         if (field.defaultValue !== undefined) {
           acc[field.name] = field.defaultValue
-        } else {
-          const fieldType = field.validation?._def?.typeName
-          if (fieldType === 'ZodNumber') {
+        } else if (field.validation) {
+          if (field.validation instanceof z.ZodNumber) {
             acc[field.name] = 0
-          } else if (fieldType === 'ZodBoolean') {
+          } else if (field.validation instanceof z.ZodBoolean) {
             acc[field.name] = false
-          } else if (fieldType === 'ZodArray') {
+          } else if (field.validation instanceof z.ZodArray) {
             acc[field.name] = []
-          } else if (fieldType === 'ZodObject') {
+          } else if (field.validation instanceof z.ZodObject) {
             acc[field.name] = {}
           } else {
             acc[field.name] = ''
           }
+        } else {
+          acc[field.name] = ''
         }
         return acc
       }, {} as Record<string, unknown>),
@@ -99,6 +100,7 @@ export const Form = ({
                     type={field.type || 'text'}
                     placeholder={field.placeholder}
                     {...formField}
+                    value={formField.value != null ? String(formField.value) : ''}
                   />
                 </FormControl>
                 <FormMessage />
