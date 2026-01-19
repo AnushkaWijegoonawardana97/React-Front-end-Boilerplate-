@@ -127,30 +127,33 @@ const DialogTrigger = React.forwardRef<
   }
 >(({ children, onClick, asChild, ...props }, ref) => {
   if (asChild && React.isValidElement(children)) {
-    const childRef = (children as React.ReactElement).ref
-    const mergedRef = (node: HTMLElement | null) => {
+    const childElement = children as React.ReactElement
+    const isChildRefFunction = typeof childElement.ref === 'function'
+    
+    const mergedRef = React.useCallback((node: HTMLElement | null) => {
       if (typeof ref === 'function') {
         ref(node as HTMLButtonElement)
       } else if (ref) {
         ref.current = node as HTMLButtonElement
       }
-      if (typeof childRef === 'function') {
-        childRef(node)
-      } else if (childRef && 'current' in childRef) {
-        ;(childRef as React.MutableRefObject<HTMLElement | null>).current = node
+      if (isChildRefFunction && childElement.ref) {
+        ;(childElement.ref as (node: HTMLElement | null) => void)(node)
       }
-    }
+    }, [ref, isChildRefFunction, childElement])
+    
+    const mergedOnClick = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
+      onClick?.(e as React.MouseEvent<HTMLButtonElement>)
+      if (childElement.props.onClick) {
+        childElement.props.onClick(e)
+      }
+    }, [onClick, childElement])
+    
     return React.cloneElement(
-      children as React.ReactElement,
+      childElement,
       {
         ref: mergedRef,
         ...props,
-        onClick: (e: React.MouseEvent<HTMLElement>) => {
-          onClick?.(e as React.MouseEvent<HTMLButtonElement>)
-          if (children.props.onClick) {
-            children.props.onClick(e)
-          }
-        },
+        onClick: mergedOnClick,
       } as React.HTMLAttributes<HTMLElement>
     )
   }
