@@ -1,0 +1,224 @@
+# React Frontend Boilerplate - Cursor Rules
+
+## Project Architecture
+
+### Atomic Design Structure
+This project follows Atomic Design principles. Components MUST be organized in the following hierarchy:
+
+1. **Atoms** (`src/components/atoms/`): Basic building blocks that cannot be broken down further
+   - Examples: Button, Input, Label, Icon
+   - Should be reusable and have no dependencies on other components
+   - Use Shadcn UI components as base when available
+
+2. **Molecules** (`src/components/molecules/`): Simple combinations of atoms
+   - Examples: FormField, Card, Alert, SearchBar
+   - Should compose atoms to create simple UI patterns
+   - Can depend on atoms only
+
+3. **Organisms** (`src/components/organisms/`): Complex UI components combining molecules and atoms
+   - Examples: Header, DataTable, Form, Navigation
+   - Should handle complex interactions and business logic
+   - Can depend on molecules and atoms
+
+4. **Templates** (`src/components/templates/`): Page-level layouts
+   - Examples: DashboardLayout, AuthLayout, AdminLayout
+   - Should define page structure and layout
+   - Can depend on organisms, molecules, and atoms
+
+5. **Pages** (`src/components/pages/`): Full page components
+   - Examples: HomePage, LoginPage, DashboardPage
+   - Should compose templates and organisms to create complete pages
+   - Can depend on all lower-level components
+
+### Component Organization Rules
+- Each component MUST be in its own folder with the component name
+- Component files MUST be named using PascalCase (e.g., `Button.tsx`)
+- Each component folder MUST contain an `index.ts` file that exports the component
+- Components MUST follow the single responsibility principle
+- Components MUST be self-contained and reusable
+
+## Coding Principles
+
+### SOLID Principles
+1. **Single Responsibility Principle (SRP)**: Each component/function should have one reason to change
+2. **Open/Closed Principle (OCP)**: Components should be open for extension but closed for modification
+3. **Liskov Substitution Principle (LSP)**: Derived components should be substitutable for their base components
+4. **Interface Segregation Principle (ISP)**: Create specific interfaces rather than general-purpose ones
+5. **Dependency Inversion Principle (DIP)**: Depend on abstractions, not concretions
+
+### DRY (Don't Repeat Yourself)
+- Extract common logic into hooks, utilities, or shared components
+- Avoid duplicating code across components
+- Use composition over duplication
+
+### KISS (Keep It Simple, Stupid)
+- Prefer simple, straightforward solutions
+- Avoid over-engineering
+- Write code that is easy to understand and maintain
+
+### YAGNI (You Aren't Gonna Need It)
+- Don't add functionality until it's actually needed
+- Avoid speculative code
+- Focus on current requirements
+
+## TypeScript Guidelines
+
+- ALWAYS use TypeScript for all files
+- NEVER use `any` type unless absolutely necessary with documented justification
+- Define proper interfaces and types for all props, functions, and data structures
+- Use type inference where appropriate but be explicit for public APIs
+- Fix TypeScript errors immediately rather than working around them
+- Use strict TypeScript configuration
+
+## React Best Practices
+
+- Use functional components with hooks
+- Prefer `useState` and `useEffect` for local state and side effects
+- Use custom hooks for reusable logic
+- Implement proper error boundaries
+- Use React.memo for performance optimization when needed
+- Follow React hooks rules (hooks at top level, conditional hooks are forbidden)
+
+## Component Development
+
+- Components MUST be self-documenting with clear, descriptive names
+- Use descriptive prop names that indicate their purpose
+- Implement proper prop validation with TypeScript
+- Components MUST handle loading, error, and empty states appropriately
+- Use composition over configuration
+- Prefer controlled components over uncontrolled when possible
+
+## Styling Guidelines
+
+- Use Tailwind CSS for all styling
+- Use Shadcn UI components as base components
+- Follow Tailwind utility-first approach
+- Use the `cn()` utility function for conditional classes
+- Maintain consistent spacing and sizing using Tailwind's scale
+- Use CSS variables for theme customization
+
+## File Structure Guidelines
+
+### Folder Organization
+- `src/components/`: All React components organized by atomic design
+- `src/constants/`: Application-wide constants
+- `src/context/`: React Context providers
+- `src/hooks/`: Custom React hooks
+- `src/services/`: API and external service integrations
+- `src/types/`: TypeScript type definitions (including API response types and DTOs)
+- `src/utils/`: Utility functions and helpers
+
+### Naming Conventions
+- Components: PascalCase (e.g., `UserProfile.tsx`)
+- Hooks: camelCase starting with "use" (e.g., `useAuth.ts`)
+- Utilities: camelCase (e.g., `formatDate.ts`)
+- Constants: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
+- Types/Interfaces: PascalCase (e.g., `UserDto`, `ApiResponse`)
+
+## Git Commit Guidelines
+
+### Semantic Commit Messages
+All commits MUST follow the semantic commit format:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Commit Types
+- `feat`: New feature (triggers minor version bump)
+- `fix`: Bug fix (triggers patch version bump)
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks, dependency updates
+- `ci`: CI/CD changes
+- `build`: Build system changes
+
+### Breaking Changes
+- Use `BREAKING CHANGE:` in the footer for breaking changes (triggers major version bump)
+- Format: `BREAKING CHANGE: <description>`
+
+### Examples
+```
+feat(auth): add user login functionality
+
+fix(api): resolve CORS error in production
+
+feat(components): add new DataTable component
+
+BREAKING CHANGE: API endpoint structure changed
+```
+
+## Pull Request Guidelines
+
+### PR Requirements
+- PR title MUST follow semantic commit format
+- PR description MUST include:
+  - What changes were made
+  - Why the changes were made
+  - How to test the changes
+  - Screenshots (if UI changes)
+- All CI checks MUST pass before merge
+- Code MUST be reviewed by at least one team member
+- PR MUST be up to date with main branch
+
+### PR Validation
+- Build MUST succeed
+- Linting MUST pass with no errors
+- TypeScript compilation MUST succeed
+- All tests MUST pass (if applicable)
+
+## Code Quality
+
+### Best Practices
+- Write self-documenting code with meaningful variable and function names
+- Add comments only when necessary to explain "why", not "what"
+- Keep functions small and focused
+- Avoid deep nesting (max 3 levels)
+- Use early returns to reduce nesting
+- Handle errors gracefully with proper error messages
+
+### Design Patterns
+- Use composition pattern for component reuse
+- Implement factory pattern for complex object creation
+- Use observer pattern for event handling
+- Apply strategy pattern for interchangeable algorithms
+- Use dependency injection for service dependencies
+
+## Performance
+
+- Use React.memo for expensive components
+- Implement code splitting for large components
+- Lazy load routes and heavy components
+- Optimize images and assets
+- Use proper keys in lists
+- Avoid unnecessary re-renders
+
+## Security
+
+- Never commit secrets or API keys
+- Use environment variables for sensitive data
+- Validate and sanitize user inputs
+- Implement proper authentication and authorization
+- Use HTTPS for API calls
+- Follow OWASP security best practices
+
+## Testing (Future)
+
+- Write unit tests for utilities and hooks
+- Write integration tests for complex components
+- Write E2E tests for critical user flows
+- Maintain high test coverage (>80%)
+
+## Documentation
+
+- Document complex algorithms and business logic
+- Keep README.md updated
+- Document API endpoints and data structures
+- Include JSDoc comments for public APIs
