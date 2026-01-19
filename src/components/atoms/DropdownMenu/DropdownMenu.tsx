@@ -22,10 +22,10 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     }
   }, [open])
 
-  const handleOpenChange = (newOpen: boolean) => {
+  const handleOpenChange = React.useCallback((newOpen: boolean) => {
     setIsOpen(newOpen)
     onOpenChange?.(newOpen)
-  }
+  }, [onOpenChange])
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -49,7 +49,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen])
+  }, [isOpen, handleOpenChange])
 
   return (
     <div ref={menuRef} className="relative inline-block text-left">

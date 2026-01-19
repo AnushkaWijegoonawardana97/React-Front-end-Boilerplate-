@@ -66,10 +66,18 @@ const useFormField = () => {
   const itemContext = React.useContext(FormItemContext)
   const { getFieldState, formState } = useFormContext()
 
-  const fieldState = getFieldState(fieldContext?.name ?? '', formState)
-
   if (!fieldContext) {
     throw new Error('useFormField should be used within <FormField>')
+  }
+
+  const fieldState = getFieldState(fieldContext.name, formState)
+
+  if (!itemContext) {
+    throw new Error('useFormField should be used within <FormItem>')
+  }
+
+  if (!itemContext.id) {
+    throw new Error('FormItemContext is missing required id property')
   }
 
   const { id } = itemContext
@@ -88,8 +96,8 @@ type FormItemContextValue = {
   id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue
+const FormItemContext = React.createContext<FormItemContextValue | null>(
+  null
 )
 
 const FormItem = React.forwardRef<
@@ -186,6 +194,7 @@ const FormMessage = React.forwardRef<
 })
 FormMessage.displayName = 'FormMessage'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export {
   useFormField,
   Form,

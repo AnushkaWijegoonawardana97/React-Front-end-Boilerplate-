@@ -421,7 +421,7 @@ This project enforces code quality through:
 
 ## License
 
-[Add your license here]
+MIT License - see the LICENSE file for details.
 
 ## Support
 

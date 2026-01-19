@@ -68,17 +68,21 @@ jobs:
       - name: Commit version bump
         run: |
           git add package.json
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}" || exit 0
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }} [skip ci]" || exit 0
           git push
 
       - name: Generate release notes
         id: release_notes
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          NEW_VERSION="${{ steps.bump.outputs.new_version }}"
+          
           if [ -z "$LAST_TAG" ]; then
             COMMITS=$(git log --pretty=format:"- %s" --no-merges)
+            CHANGELOG_URL="https://github.com/${{ github.repository }}/compare/HEAD...v${NEW_VERSION}"
           else
             COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+            CHANGELOG_URL="https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${NEW_VERSION}"
           fi
           
           RELEASE_NOTES=$(cat <<EOF
@@ -86,7 +90,7 @@ jobs:
           
           $COMMITS
           
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.bump.outputs.new_version }}...HEAD
+          **Full Changelog**: ${CHANGELOG_URL}
           EOF
           )
           

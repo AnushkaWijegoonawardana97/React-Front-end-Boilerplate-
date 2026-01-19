@@ -4,7 +4,7 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((val: T) => T)) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
+  const readValue = (): T => {
     if (typeof window === 'undefined') {
       return initialValue
     }
@@ -15,7 +15,9 @@ export function useLocalStorage<T>(
       console.error(error)
       return initialValue
     }
-  })
+  }
+
+  const [storedValue, setStoredValue] = useState<T>(readValue)
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {

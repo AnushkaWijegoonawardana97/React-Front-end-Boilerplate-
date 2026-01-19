@@ -1,45 +1,56 @@
+import * as React from 'react'
 import { Label } from '@/components/atoms/Label/Label'
-import { Input } from '@/components/atoms/Input/Input'
+import { Input, type InputProps } from '@/components/atoms/Input/Input'
 import { cn } from '@/utils/cn'
 
-export interface FormFieldProps {
+export interface FormFieldProps extends InputProps {
   label: string
-  name: string
-  type?: string
-  placeholder?: string
-  required?: boolean
   error?: string
-  className?: string
+  containerClassName?: string
 }
 
-export const FormField = ({
-  label,
-  name,
-  type = 'text',
-  placeholder,
-  required = false,
-  error,
-  className,
-}: FormFieldProps) => {
-  return (
-    <div className={cn('space-y-2', className)}>
-      <Label htmlFor={name}>
-        {label}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        required={required}
-        className={error ? 'border-destructive' : ''}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${name}-error` : undefined}
-      />
-      {error && (
-        <p id={`${name}-error`} className="text-sm text-destructive mt-1">{error}</p>
-      )}
-    </div>
-  )
-}
+export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
+  (
+    {
+      label,
+      name,
+      type = 'text',
+      placeholder,
+      required = false,
+      error,
+      className,
+      containerClassName,
+      ...props
+    },
+    ref
+  ) => {
+    const inputId = name || props.id
+
+    return (
+      <div className={cn('space-y-2', containerClassName)}>
+        <Label htmlFor={inputId}>
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </Label>
+        <Input
+          ref={ref}
+          id={inputId}
+          name={name}
+          type={type}
+          placeholder={placeholder}
+          required={required}
+          className={cn(error ? 'border-destructive' : '', className)}
+          aria-invalid={!!error}
+          aria-describedby={error && inputId ? `${inputId}-error` : undefined}
+          {...props}
+        />
+        {error && inputId && (
+          <p id={`${inputId}-error`} className="text-sm text-destructive mt-1">
+            {error}
+          </p>
+        )}
+      </div>
+    )
+  }
+)
+FormField.displayName = 'FormField'

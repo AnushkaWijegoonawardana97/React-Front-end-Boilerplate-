@@ -16,19 +16,30 @@ const DialogContext = React.createContext<{
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   const dialogRef = React.useRef<HTMLDivElement>(null)
   const previousActiveElementRef = React.useRef<HTMLElement | null>(null)
+  const previousOverflowRef = React.useRef<string | null>(null)
   const titleId = React.useId()
   const descriptionId = React.useId()
 
   React.useEffect(() => {
     if (open) {
-      document.body.style.overflow = 'hidden'
+      const prev = document.body.style.overflow
+      previousOverflowRef.current = prev || null
+      if (document.body.style.overflow !== 'hidden') {
+        document.body.style.overflow = 'hidden'
+      }
       previousActiveElementRef.current = document.activeElement as HTMLElement
     } else {
-      document.body.style.overflow = ''
+      if (previousOverflowRef.current !== null) {
+        document.body.style.overflow = previousOverflowRef.current
+        previousOverflowRef.current = null
+      }
       previousActiveElementRef.current?.focus()
     }
     return () => {
-      document.body.style.overflow = ''
+      if (previousOverflowRef.current !== null) {
+        document.body.style.overflow = previousOverflowRef.current
+        previousOverflowRef.current = null
+      }
       previousActiveElementRef.current?.focus()
     }
   }, [open])
@@ -116,10 +127,22 @@ const DialogTrigger = React.forwardRef<
   }
 >(({ children, onClick, asChild, ...props }, ref) => {
   if (asChild && React.isValidElement(children)) {
+    const mergedRef = (node: HTMLElement | null) => {
+      if (typeof ref === 'function') {
+        ref(node as HTMLButtonElement)
+      } else if (ref) {
+        ref.current = node as HTMLButtonElement
+      }
+      if (typeof (children as React.ReactElement).ref === 'function') {
+        ;(children as React.ReactElement).ref(node)
+      } else if ((children as React.ReactElement).ref) {
+        ;((children as React.ReactElement).ref as React.MutableRefObject<HTMLElement | null>).current = node
+      }
+    }
     return React.cloneElement(
       children as React.ReactElement,
       {
-        ref,
+        ref: mergedRef,
         ...props,
         onClick: (e: React.MouseEvent<HTMLElement>) => {
           onClick?.(e as React.MouseEvent<HTMLButtonElement>)

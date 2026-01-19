@@ -1,9 +1,8 @@
 import * as React from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  Form as ShadcnForm,
   FormField,
   FormItem,
   FormLabel,
@@ -12,6 +11,7 @@ import {
 } from '@/components/atoms/Form/Form'
 import { Input } from '@/components/atoms/Input/Input'
 import { Button } from '@/components/atoms/Button/Button'
+import { cn } from '@/utils/cn'
 
 export interface FormFieldConfig {
   name: string
@@ -74,7 +74,7 @@ export const Form = ({
     [fields]
   )
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues,
   })
@@ -84,30 +84,32 @@ export const Form = ({
   }
 
   return (
-    <ShadcnForm onSubmit={form.handleSubmit(handleSubmit)} className={className}>
-      {fields.map((field) => (
-        <FormField
-          key={field.name}
-          control={form.control}
-          name={field.name}
-          render={({ field: formField }) => (
-            <FormItem>
-              <FormLabel>{field.label}</FormLabel>
-              <FormControl>
-                <Input
-                  type={field.type || 'text'}
-                  placeholder={field.placeholder}
-                  {...formField}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      ))}
-      <Button type="submit" className="w-full mt-4">
-        {submitLabel}
-      </Button>
-    </ShadcnForm>
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className={cn('space-y-4', className)}>
+        {fields.map((field) => (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormLabel>{field.label}</FormLabel>
+                <FormControl>
+                  <Input
+                    type={field.type || 'text'}
+                    placeholder={field.placeholder}
+                    {...formField}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
+        <Button type="submit" className="w-full mt-4">
+          {submitLabel}
+        </Button>
+      </form>
+    </FormProvider>
   )
 }
