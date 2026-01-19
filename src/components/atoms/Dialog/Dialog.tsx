@@ -127,16 +127,17 @@ const DialogTrigger = React.forwardRef<
   }
 >(({ children, onClick, asChild, ...props }, ref) => {
   if (asChild && React.isValidElement(children)) {
+    const childRef = (children as React.ReactElement).ref
     const mergedRef = (node: HTMLElement | null) => {
       if (typeof ref === 'function') {
         ref(node as HTMLButtonElement)
       } else if (ref) {
         ref.current = node as HTMLButtonElement
       }
-      if (typeof (children as React.ReactElement).ref === 'function') {
-        ;(children as React.ReactElement).ref(node)
-      } else if ((children as React.ReactElement).ref) {
-        ;((children as React.ReactElement).ref as React.MutableRefObject<HTMLElement | null>).current = node
+      if (typeof childRef === 'function') {
+        childRef(node)
+      } else if (childRef && 'current' in childRef) {
+        ;(childRef as React.MutableRefObject<HTMLElement | null>).current = node
       }
     }
     return React.cloneElement(
