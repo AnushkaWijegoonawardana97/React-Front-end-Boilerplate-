@@ -120,47 +120,69 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   )
 }
 
+type ReactElementWithRef = React.ReactElement & {
+  ref?: React.Ref<HTMLElement>
+  props?: {
+    onClick?: (e: React.MouseEvent<HTMLElement>) => void
+  }
+}
+
 const DialogTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
     asChild?: boolean
   }
 >(({ children, onClick, asChild, ...props }, ref) => {
+  const childElementRef = React.useRef<ReactElementWithRef | null>(null)
+  const childRefCallbackRef = React.useRef<((node: HTMLElement | null) => void) | null>(null)
+  const childOnClickRef = React.useRef<((e: React.MouseEvent<HTMLElement>) => void) | undefined>(undefined)
+  
+  React.useLayoutEffect(() => {
+    if (asChild && React.isValidElement(children)) {
+      const childElement = children as ReactElementWithRef
+      childElementRef.current = childElement
+      childOnClickRef.current = childElement.props?.onClick
+      const originalChildRef = childElement.ref
+      if (typeof originalChildRef === 'function') {
+        childRefCallbackRef.current = originalChildRef
+      } else {
+        childRefCallbackRef.current = null
+      }
+    } else {
+      childElementRef.current = null
+      childRefCallbackRef.current = null
+      childOnClickRef.current = undefined
+    }
+  }, [asChild, children])
+  
   const mergedRef = React.useCallback((node: HTMLElement | null) => {
     if (typeof ref === 'function') {
       ref(node as HTMLButtonElement)
     } else if (ref) {
       ref.current = node as HTMLButtonElement
     }
+    const childRefCallback = childRefCallbackRef.current
+    if (childRefCallback) {
+      childRefCallback(node)
+    }
   }, [ref])
   
   const mergedOnClick = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     onClick?.(e as React.MouseEvent<HTMLButtonElement>)
+    const childOnClick = childOnClickRef.current
+    if (childOnClick) {
+      childOnClick(e)
+    }
   }, [onClick])
   
   if (asChild && React.isValidElement(children)) {
-    const childElement = children as React.ReactElement
-    const originalOnClick = childElement.props.onClick as ((e: React.MouseEvent<HTMLElement>) => void) | undefined
-    
-    const handleRef = (node: HTMLElement | null) => {
-      mergedRef(node)
-      const originalChildRef = childElement.ref
-      if (typeof originalChildRef === 'function') {
-        originalChildRef(node)
-      }
-    }
-    
-    const handleClick = (e: React.MouseEvent<HTMLElement>) => {
-      mergedOnClick(e)
-      originalOnClick?.(e)
-    }
-    
+    const childElement = children as ReactElementWithRef
     return React.cloneElement(
       childElement,
       {
-        ref: handleRef,
+        ref: mergedRef,
         ...props,
-        onClick: handleClick,
+        onClick: mergedOnClick,
       } as React.HTMLAttributes<HTMLElement>
     )
   }
