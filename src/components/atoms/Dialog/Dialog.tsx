@@ -126,34 +126,41 @@ const DialogTrigger = React.forwardRef<
     asChild?: boolean
   }
 >(({ children, onClick, asChild, ...props }, ref) => {
+  const mergedRef = React.useCallback((node: HTMLElement | null) => {
+    if (typeof ref === 'function') {
+      ref(node as HTMLButtonElement)
+    } else if (ref) {
+      ref.current = node as HTMLButtonElement
+    }
+  }, [ref])
+  
+  const mergedOnClick = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
+    onClick?.(e as React.MouseEvent<HTMLButtonElement>)
+  }, [onClick])
+  
   if (asChild && React.isValidElement(children)) {
     const childElement = children as React.ReactElement
-    const isChildRefFunction = typeof childElement.ref === 'function'
+    const originalOnClick = childElement.props.onClick as ((e: React.MouseEvent<HTMLElement>) => void) | undefined
     
-    const mergedRef = React.useCallback((node: HTMLElement | null) => {
-      if (typeof ref === 'function') {
-        ref(node as HTMLButtonElement)
-      } else if (ref) {
-        ref.current = node as HTMLButtonElement
+    const handleRef = (node: HTMLElement | null) => {
+      mergedRef(node)
+      const originalChildRef = childElement.ref
+      if (typeof originalChildRef === 'function') {
+        originalChildRef(node)
       }
-      if (isChildRefFunction && childElement.ref) {
-        ;(childElement.ref as (node: HTMLElement | null) => void)(node)
-      }
-    }, [ref, isChildRefFunction, childElement])
+    }
     
-    const mergedOnClick = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
-      onClick?.(e as React.MouseEvent<HTMLButtonElement>)
-      if (childElement.props.onClick) {
-        childElement.props.onClick(e)
-      }
-    }, [onClick, childElement])
+    const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+      mergedOnClick(e)
+      originalOnClick?.(e)
+    }
     
     return React.cloneElement(
       childElement,
       {
-        ref: mergedRef,
+        ref: handleRef,
         ...props,
-        onClick: mergedOnClick,
+        onClick: handleClick,
       } as React.HTMLAttributes<HTMLElement>
     )
   }
